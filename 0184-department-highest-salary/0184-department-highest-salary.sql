@@ -7,6 +7,7 @@ FROM employee AS e
         , MAX(salary) AS max_salary
         FROM employee
         GROUP BY departmentId) AS m ON e.departmentId = m.departmentId
-    JOIN department as d ON e.departmentId = d.id
-WHERE e.salary = m.max_salary;
+                                        AND e.salary = m.max_salary
+    JOIN department as d ON e.departmentId = d.id;
+
 
