@@ -1,13 +1,10 @@
-# Write your MySQL query statement below
+/* Write your T-SQL query statement below */
 SELECT d.name AS Department
      , e.name AS Employee
-     , m.max_salary AS Salary
+     , e.salary AS Salary
 FROM employee AS e
-    JOIN (SELECT departmentId
-        , MAX(salary) AS max_salary
-        FROM employee
-        GROUP BY departmentId) AS m ON e.departmentId = m.departmentId
-                                        AND e.salary = m.max_salary
-    JOIN department as d ON e.departmentId = d.id;
-
-
+    JOIN department AS d ON e.departmentid = d.id
+    LEFT JOIN (SELECT DISTINCT departmentid AS departmentid
+                        , MAX (salary) OVER (PARTITION BY departmentid) AS max_salary
+          FROM employee) AS m ON e.departmentid = m.departmentid 
+WHERE e.salary = m.max_salary;
