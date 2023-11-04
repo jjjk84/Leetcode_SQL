@@ -3,34 +3,22 @@
 -- the number of people is greater than or equal to 100 for each
 -- ordered by visit_date in ascending order
 
-WITH over_100 AS (
-    SELECT id
-    FROM stadium
-    WHERE people >= 100
-), con_sec AS (
-    SELECT id
+WITH base AS(
+    SELECT *
+         , LAG(id, 2) OVER (ORDER BY id) AS pre_pre_id
+         , LAG(id, 1) OVER (ORDER BY id) AS pre_id
          , LEAD(id, 1) OVER (ORDER BY id) AS next_id
          , LEAD(id, 2) OVER (ORDER BY id) AS next_next_id
-    FROM over_100)
+    FROM stadium
+    WHERE people >= 100
+)
 
 
-SELECT *
-FROM stadium
-WHERE (id - 1, id, id + 1) IN (
-    SELECT *
-    FROM con_sec
-    WHERE id + 1 = next_id
-      AND next_id + 1 = next_next_id
-)
-   OR (id, id + 1, id + 2) IN (
-    SELECT *
-    FROM con_sec
-    WHERE id + 1 = next_id
-      AND next_id + 1 = next_next_id
-)
-   OR (id - 2, id - 1, id) IN (
-    SELECT *
-    FROM con_sec
-    WHERE id + 1 = next_id
-      AND next_id + 1 = next_next_id
-)
+SELECT id
+     , visit_date
+     , people
+FROM base
+WHERE (pre_pre_id + 1 = pre_id AND pre_id + 1 = id)
+   OR (pre_id + 1 = id AND id + 1 = next_id)
+   OR (id + 1 = next_id AND next_id + 1 = next_next_id)
+ORDER BY visit_date;
